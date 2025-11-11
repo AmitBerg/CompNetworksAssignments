@@ -5,21 +5,38 @@ import time
 
 from domain import DomainList, DomainEntry, NO_DOMAIN_ENTRY_STR
 
+
 def resolve_ns_record(s: socket.socket, domain_list: DomainList, cache_time: int, ip_str: str, query: str) -> str:
-    ns_ip, port_str = ip_str.split(':')
-    port = int(port_str)
-    s.sendto(query.encode(), (ns_ip, port))
-    parent_answer, _ = s.recvfrom(1024)
-    answer = parent_answer.decode()
-    # Cache the record response as well
-    if answer != NO_DOMAIN_ENTRY_STR:
+    current_ns_ip, current_port_str = ip_str.split(':')
+    current_port = int(current_port_str)
+
+    while True:
+        s.sendto(query.encode(), (current_ns_ip, current_port))
+
+        ns_answer_bytes, _ = s.recvfrom(1024)
+        answer = ns_answer_bytes.decode()
+
+        if answer == NO_DOMAIN_ENTRY_STR:
+            break
+
         parts = answer.split(',')
-        if len(parts) == 3:
-            domain, ip, entry_type = parts[0], parts[1], parts[2]
-            expire_time = None
-            if cache_time > 0:
-                expire_time = time.time() + cache_time
-            domain_list.add(DomainEntry(domain, ip, entry_type, expire_time))
+
+        if len(parts) != 3:
+            break
+
+        domain, ip, entry_type = parts[0], parts[1], parts[2]
+
+        expire_time = None
+        if cache_time > 0:
+            expire_time = time.time() + cache_time
+        domain_list.add(DomainEntry(domain, ip, entry_type, expire_time))
+
+        if entry_type == DomainEntry.TYPE_A:
+            break
+
+        elif entry_type == DomainEntry.TYPE_NS:
+            current_ns_ip, current_port_str = ip.split(':')
+            current_port = int(current_port_str)
 
     return answer
 
