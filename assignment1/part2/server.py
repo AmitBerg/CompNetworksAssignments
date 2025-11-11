@@ -7,11 +7,11 @@ from domain import DomainList, DomainEntry
 if __name__ == "__main__":
 
     if len(argv) < 3:
-        print("Usage: python server.py <domain_file> <port>")
+        print("Usage: python server.py <myPort> <zoneFileName>")
         sys.exit()
 
-    domain_file_name = argv[1]
-    port = int(argv[2])
+    port = int(argv[1])
+    domain_file_name = argv[2]
 
     if port < 0 or port > 65535:
         print("Port number must be in range 0-65535")
@@ -39,5 +39,6 @@ if __name__ == "__main__":
 
     while True:
         data, addr = s.recvfrom(1024)
-        answer = domain_list.resolve(str(data))
-        s.sendto(answer, addr)
+        query = data.decode()
+        answer = domain_list.resolve(query)
+        s.sendto(answer.encode(), addr)

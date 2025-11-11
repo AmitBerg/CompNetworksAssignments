@@ -1,0 +1,35 @@
+import socket
+import sys
+from sys import argv
+
+if __name__ == "__main__":
+
+    if len(argv) < 3:
+        print("Usage: python client.py <serverIP> <serverPort>")
+        sys.exit()
+
+    server_ip = argv[1]
+    server_port = int(argv[2])
+
+    if server_port < 0 or server_port > 65535:
+        print("Server port number must be in range 0-65535")
+        sys.exit()
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+    try:
+        while True:
+            query = input()
+            s.sendto(query.encode(), (server_ip, server_port))
+            data, addr = s.recvfrom(1024)
+            answer = data.decode()
+            parts = answer.split(',')
+            if len(parts) == 3:
+                ip = parts[1]
+                print(ip)
+            else:
+                print(answer)
+    except KeyboardInterrupt:
+        pass
+
+    s.close()
