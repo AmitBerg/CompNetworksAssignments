@@ -33,8 +33,8 @@ class DomainList:
     def resolve(self, query: str) -> str:
         self.remove_expired()
         for domain_entry in self.domains:
-            print(f"Checking domain entry: {domain_entry} for query: {query}, entry_type: {domain_entry.entry_type}")
-            print(f"{domain_entry.domain == query}, {domain_entry.entry_type == DomainEntry.TYPE_A}")
+            # print(f"Checking domain entry: {domain_entry} for query: {query}, entry_type: {domain_entry.entry_type}")
+            # print(f"{domain_entry.domain == query}, {domain_entry.entry_type == DomainEntry.TYPE_A}")
             if domain_entry.domain == query and domain_entry.entry_type == DomainEntry.TYPE_A:
                 return domain_entry.__str__()
         for domain_entry in self.domains:

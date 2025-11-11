@@ -5,8 +5,25 @@ import time
 
 from domain import DomainList, DomainEntry, NO_DOMAIN_ENTRY_STR
 
-if __name__ == "__main__":
+def resolve_ns_record(s: socket.socket, domain_list: DomainList, cache_time: int, ip_str: str, query: str) -> str:
+    ns_ip, port_str = ip_str.split(':')
+    port = int(port_str)
+    s.sendto(query.encode(), (ns_ip, port))
+    parent_answer, _ = s.recvfrom(1024)
+    answer = parent_answer.decode()
+    # Cache the record response as well
+    if answer != NO_DOMAIN_ENTRY_STR:
+        parts = answer.split(',')
+        if len(parts) == 3:
+            domain, ip, entry_type = parts[0], parts[1], parts[2]
+            expire_time = None
+            if cache_time > 0:
+                expire_time = time.time() + cache_time
+            domain_list.add(DomainEntry(domain, ip, entry_type, expire_time))
 
+    return answer
+
+def main():
     if len(argv) < 5:
         print("Usage: python resolver.py <myPort> <parentIP> <parentPort> <cacheTime>")
         sys.exit()
@@ -34,9 +51,17 @@ if __name__ == "__main__":
         query = data.decode()
         answer = domain_list.resolve(query)
 
-        if answer == NO_DOMAIN_ENTRY_STR:
+        if answer != NO_DOMAIN_ENTRY_STR:
+            # check if it is an NS entry
+            parts = answer.split(',')
+            if len(parts) == 3:
+                ip, entry_type = parts[1], parts[2]
+                # For NS entries, we need to resolve the A record from the parent server
+                if entry_type == DomainEntry.TYPE_NS:
+                    answer = resolve_ns_record(s, domain_list, cache_time, ip, query)
+
+        elif answer == NO_DOMAIN_ENTRY_STR:
             # Forward the request to the parent server
-            # print("Forwarding request to parent server at {}:{}".format(parent_ip, parent_port))
             s.sendto(data, (parent_ip, parent_port))
             parent_answer, _ = s.recvfrom(1024)
             answer = parent_answer.decode()
@@ -45,31 +70,17 @@ if __name__ == "__main__":
             if answer != NO_DOMAIN_ENTRY_STR:
                 parts = answer.split(',')
                 if len(parts) == 3:
-                    domain = parts[0]
-                    ip = parts[1]
-                    entry_type = parts[2]
+                    domain, ip, entry_type = parts[0], parts[1], parts[2]
                     expire_time = None
                     if cache_time > 0:
                         expire_time = time.time() + cache_time
                     domain_list.add(DomainEntry(domain, ip, entry_type, expire_time))
 
+                    # For NS entries, we need to resolve the A record from the parent server
+                    if entry_type == DomainEntry.TYPE_NS:
+                        answer = resolve_ns_record(s, domain_list, cache_time, ip, query)
+
         s.sendto(answer.encode(), addr)
 
-
-# print("domain: {}, ip: {}, entry_type: {}".format(domain, ip, entry_type))
-#
-# while entry_type is not DomainEntry.TYPE_A:
-#     # For NS entries, send another request to get the A record from the server
-#     # with address 'ip'
-#     print("Trying to resolve NS entry for domain: {}, ip: {}, entry_type: {}".format(domain, ip, entry_type))
-#     ns_ip, port = ip.split(':')
-#     port = int(port)
-#     s.sendto(query.encode(), (ns_ip, port))
-#     parent_answer, _ = s.recvfrom(1024)
-#     answer = parent_answer.decode()
-#     parts = answer.split(',')
-#     if len(parts) != 3:
-#         break
-#     domain = parts[0]
-#     ip = parts[1]
-#     entry_type = parts[2]
+if __name__ == "__main__":
+    main()
