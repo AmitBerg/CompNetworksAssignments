@@ -1,3 +1,5 @@
 biu.ac.il,1.2.3.4,A
-.co.il,127.0.0.1:7777,NS
+.co.il,127.0.0.1:22222,NS
 example.com,1.2.3.7,A
+test.com,1.2.3.5,A
+another.example.com,1.2.3.6,A
