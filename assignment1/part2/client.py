@@ -2,8 +2,7 @@ import socket
 import sys
 from sys import argv
 
-if __name__ == "__main__":
-
+def main():
     if len(argv) < 3:
         print("Usage: python client.py <serverIP> <serverPort>")
         sys.exit()
@@ -33,3 +32,6 @@ if __name__ == "__main__":
         pass
 
     s.close()
+
+if __name__ == "__main__":
+    main()

@@ -3,8 +3,7 @@ import sys
 from sys import argv
 import time
 
-from domain import DomainList, DomainEntry, NO_DOMAIN_ENTRY_STR
-
+from server import DomainList, DomainEntry, NO_DOMAIN_ENTRY_STR
 
 def resolve_ns_record(s: socket.socket, domain_list: DomainList, cache_time: int, ip_str: str, query: str) -> str:
     current_ns_ip, current_port_str = ip_str.split(':')
@@ -39,6 +38,7 @@ def resolve_ns_record(s: socket.socket, domain_list: DomainList, cache_time: int
             current_port = int(current_port_str)
 
     return answer
+
 
 def main():
     if len(argv) < 5:
