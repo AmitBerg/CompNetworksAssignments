@@ -35,7 +35,7 @@ class DNSClient:
         except socket.timeout:
             return None
         except Exception as e:
-            print(f"Error querying {domain}: {e}")
+            # print(f"Error querying {domain}: {e}")
             return None
     
     def close(self):

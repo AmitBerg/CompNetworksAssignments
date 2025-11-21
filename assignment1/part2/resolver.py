@@ -61,7 +61,7 @@ def resolve_ns_record(s: socket.socket, domain_list: DomainList, cache_time: int
 def main():
     # Check the amount of command line arguments
     if len(argv) < 5:
-        print("Usage: python resolver.py <myPort> <parentIP> <parentPort> <cacheTime>")
+        # print("Usage: python resolver.py <myPort> <parentIP> <parentPort> <cacheTime>")
         sys.exit()
 
     # Move the command line arguments into variables
@@ -72,11 +72,11 @@ def main():
 
     # Check that port numbers are valid
     if port < 0 or port > 65535:
-        print("Port number must be in range 0-65535")
+        # print("Port number must be in range 0-65535")
         sys.exit()
 
     if parent_port < 0 or parent_port > 65535:
-        print("Parent port number must be in range 0-65535")
+        # print("Parent port number must be in range 0-65535")
         sys.exit()
 
     # Create UDP socket and bind to the specified port
