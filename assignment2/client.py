@@ -6,7 +6,6 @@ import os
 def main():
     # Check argument amount
     if len(sys.argv) < 3:
-        print("Usage: python client.py <server_ip> <server_port>")
         return
 
     server_ip = sys.argv[1]
@@ -73,8 +72,7 @@ def main():
                         f.write(body_content)
 
         except Exception as e:
-            # If there was an error print and cont
-            print(f"Error: {e}")
+            # If there was an error we close the connection
             if sock:
                 sock.close()
 

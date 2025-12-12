@@ -5,7 +5,6 @@ import os
 def main():
     # Check argument amount
     if len(sys.argv) < 2:
-        print("Usage: python server.py <port>")
         return
 
     server_port = int(sys.argv[1])
@@ -20,9 +19,7 @@ def main():
         server_socket.listen(5)
         # Allow us to press ctrl C in order to stop the program
         server_socket.settimeout(0.5)
-        print(f"Server is listening on port {server_port}...")
     except Exception as e:
-        print(f"Error starting server: {e}")
         return
 
     while True:
@@ -42,10 +39,8 @@ def main():
             handle_client_connection(client_socket)
 
         except KeyboardInterrupt:
-            print("\nServer stopping...")
             break
         except Exception as e:
-            print(f"Server error: {e}")
             continue
 
     server_socket.close()
